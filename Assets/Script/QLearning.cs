@@ -8,6 +8,7 @@ public struct State
 	public int y;
 	public int degree;
 	public float energy;
+	public float kineticEnergy;
 };
 
 public class QLearning

@@ -27,7 +27,9 @@ public class MoveBody : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		lap = GameObject.FindGameObjectWithTag ("lap");
+		//lap=this.gameObject;
 		anchor = new Vector3 (-0.5f, 0, 0);
+		//anchor = new Vector3 (0, -0.5f, 0);
 
 		board = GameObject.FindGameObjectWithTag ("board");
 
@@ -84,18 +86,34 @@ public class MoveBody : MonoBehaviour {
 		{
 			print ("right:");
 			string r = "push right:";
-			r += QLearning_Body.Q [0, 1, 0, 0].ToString ();
+			r += QLearning_Body.Q [1, 1, 0, 1].ToString ();
 			print (r);
 			r = "push left:";
-			r += QLearning_Body.Q [0, 1, 0, 1].ToString ();
+			r += QLearning_Body.Q [1, 1, 0, 0].ToString ();
 			print (r);
 
 			print ("left:");
 			r = "push left:";
-			r += QLearning_Body.Q [0, 0, 0, 1].ToString ();
+			r += QLearning_Body.Q [0, 0, 0, 0].ToString ();
 			print (r);
 			r = "push right:";
-			r += QLearning_Body.Q [0, 0, 0, 0].ToString ();
+			r += QLearning_Body.Q [0, 0, 0, 1].ToString ();
+			print (r);
+
+			print ("middle right face left:");
+			r = "push left:";
+			r += QLearning_Body.Q [1, 0, 0, 0].ToString ();
+			print (r);
+			r = "push right:";
+			r += QLearning_Body.Q [1, 0, 0, 1].ToString ();
+			print (r);
+
+			print ("middle left face right:");
+			r = "push right:";
+			r += QLearning_Body.Q [0, 1, 0, 1].ToString ();
+			print (r);
+			r = "push left:";
+			r += QLearning_Body.Q [0, 1, 0, 0].ToString ();
 			print (r);
 
 		}
@@ -146,9 +164,18 @@ public class MoveBody : MonoBehaviour {
 			else
 				action = QLearning_Body.chooseAction (currentState);
 			moveVertical = action == 1 ? -1 : 1;
-			// action 0: right 1: left
+			// action 1: right 0: left
 		}
-		moveVertical = currentState.y == 0 ? -1 : 1;
+//		if ((currentState.y == 1 && board.transform.position.x - initialX < 0)
+//		    || (currentState.y == 0 && board.transform.position.x - initialX > 0))
+//			moveVertical = 0;
+//		moveVertical = 0;
+//		if (currentState.y == 1 && board.transform.position.x - initialX > 0)
+//			moveVertical = -1;
+//		if (currentState.y == 0 && board.transform.position.x - initialX < 0)
+//			moveVertical = 1;		
+//		print (currentState.energy);
+		//moveVertical = currentState.x == 1 ? -1 : 1;
 		transform.RotateAround (lap.transform.position + anchor, new Vector3 (0, 0, 10), 10 * moveVertical);
 	}
 
@@ -164,11 +191,13 @@ public class MoveBody : MonoBehaviour {
 			degree = (int)(this.transform.localEulerAngles.z - 360 + QLearning_Body.DegreeNum / 2);
 
 		x = Mathf.RoundToInt((board.transform.position.x - initialX) / 0.1f + QLearning_Body.Xnum / 2);
+
 		y = board.GetComponent<Rigidbody> ().velocity.x > 0 ? 1 : 0;
 
 		State state;
 		state.x = x;
-		state.x = 0;
+		state.x = board.transform.position.x - initialX > 0 ? 1 : 0;
+		//state.x = 0;
 		state.y = y;
 		degree = 0;
 		state.degree = degree;
@@ -176,6 +205,9 @@ public class MoveBody : MonoBehaviour {
 		Vector3 vel = board.GetComponent<Rigidbody> ().velocity;
 		//state.degree = (int)Vector3.SqrMagnitude (vel);
 		state.energy = (9.8f * (board.transform.position.y - initialY) + 0.5f * Vector3.SqrMagnitude (vel)) * 20;
+		state.energy = (9.8f * Mathf.Abs (board.transform.position.x - initialX) + 0.0f * Vector3.SqrMagnitude (vel)) * 20;
+		state.energy = Mathf.Asin (Mathf.Abs (board.transform.position.x - initialX) / 12) * 100;
+		state.kineticEnergy = 0.5f * Vector3.SqrMagnitude (vel) * 20;
 
 		return state;
 	}

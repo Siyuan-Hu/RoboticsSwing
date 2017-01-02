@@ -7,12 +7,14 @@ public class QLearning_Body
 	public const int ActionNum = 2; // 0: down; 1: up
 	public const int DegreeNum = 1;//200 	//100
 	public const int Xseed = 2;
-	public const int Xnum = 1;//201
+	public const int Xnum = 2;//201
 	public const int Qsize = DegreeNum * Xseed * Xnum + 1;
-	public const float gamma = 0.5f;
+	public const float gamma = 0.0f;//0.5f
 
 	public static int[] R = new int[Xnum];
 	public static float[,,,] Q = new float[Xnum, Xseed, DegreeNum, ActionNum];
+
+	private static int[,,,] iteratorTimes = new int[Xnum, Xseed, DegreeNum, ActionNum];
 
 	public static void initial()
 	{
@@ -57,12 +59,23 @@ public class QLearning_Body
 	public static void updateQ(State currentState, int action, State nextState)
 	{
 		float tmp = reward (nextState);
-
-		tmp += (nextState.energy - currentState.energy);
 //		if (tmp > Q [currentState.x, currentState.y, currentState.degree, action])
 //			Q [currentState.x, currentState.y, currentState.degree, action] = tmp;
-
-		Q [currentState.x, currentState.y, currentState.degree, action] = (Q [currentState.x, currentState.y, currentState.degree, action] + tmp) / 2;
+		//if (currentState.x == nextState.x && currentState.y == nextState.y) 
+		{
+			if (currentState.x + currentState.y == 1)
+				tmp += (-nextState.energy + currentState.energy);
+				//tmp += (nextState.kineticEnergy - currentState.kineticEnergy);
+			//else
+			if (currentState.x + currentState.y != 1)
+				tmp += (nextState.energy - currentState.energy);
+		
+			if (iteratorTimes [currentState.x, currentState.y, currentState.degree, action] < int.MaxValue)
+				Q [currentState.x, currentState.y, currentState.degree, action] = Q [currentState.x, currentState.y, currentState.degree, action]
+				- (Q [currentState.x, currentState.y, currentState.degree, action] - tmp) / (++iteratorTimes [currentState.x, currentState.y, currentState.degree, action]);
+		}
+		//Q [currentState.x, currentState.y, currentState.degree, action] = (Q [currentState.x, currentState.y, currentState.degree, action] + tmp) / 2;
+		
 	}
 
 	public static int getRandomAction()

@@ -115,6 +115,7 @@ public class MoveLeg : MonoBehaviour {
 		state.degree = degree;
 
 		state.energy = 0;
+		state.kineticEnergy = 0;
 
 		return state;
 	}
