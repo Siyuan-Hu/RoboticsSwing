@@ -14,14 +14,16 @@ public struct State
 public class QLearning
 {
 	public const int ActionNum = 2; // 0: left; 1:right
-	public const int DegreeNum = 200;
-	public const int Ynum = 60;
-	public const int Xnum = 201;
+	public const int DegreeNum = 1;//200
+	public const int Ynum = 2;//60
+	public const int Xnum = 2;//201
 	public const int Qsize = DegreeNum * Ynum * Xnum + 1;
-	public const float gamma = 0.5f;
+	public const float gamma = 0.0f;//0.5f
 
 	public static int[] R = new int[Xnum];
 	public static float[,,,] Q = new float[Xnum, Ynum, DegreeNum, ActionNum];
+
+	private static int[,,,] iteratorTimes = new int[Xnum, Ynum, DegreeNum, ActionNum];
 //	public static State currentState;
 //	public static State nextState;
 
@@ -39,15 +41,16 @@ public class QLearning
 	public static void initial()
 	{
 		R = new int[Xnum];
-		for (int i = 0; i < Xnum; i++) 
-		{
-			if (i < Xnum / 2)
-				R [i] = Xnum / 2 - i;
-			else
-				R [i] = i - Xnum / 2;
-		}
+		// use energy gap to replace the reward array
+//		for (int i = 0; i < Xnum; i++) 
+//		{
+//			if (i < Xnum / 2)
+//				R [i] = Xnum / 2 - i;
+//			else
+//				R [i] = i - Xnum / 2;
+//		}
 
-		ReadQdata ();
+		//ReadQdata ();
 		//WriteQdata ();
 	}
 
@@ -61,7 +64,7 @@ public class QLearning
 		if (Q [state.x, state.y, state.degree, 1] == 0)
 			return 1;
 
-		if (possibility >= -10)
+		if (possibility >= 0)
 			possibleAction = getMaxAction (state);
 		else
 			possibleAction = getRandomAction ();
@@ -76,7 +79,20 @@ public class QLearning
 
 	public static void updateQ(State currentState, int action, State nextState)
 	{
-		Q [currentState.x, currentState.y, currentState.degree, action] = reward (nextState);
+		float tmp = reward (nextState);
+
+		if (currentState.x + currentState.y == 1)
+			tmp += (-nextState.energy + currentState.energy);
+		//tmp += (nextState.kineticEnergy - currentState.kineticEnergy);
+		//else
+		if (currentState.x + currentState.y != 1)
+			tmp += (nextState.energy - currentState.energy);
+
+		if (iteratorTimes [currentState.x, currentState.y, currentState.degree, action] < int.MaxValue)
+			Q [currentState.x, currentState.y, currentState.degree, action] = Q [currentState.x, currentState.y, currentState.degree, action]
+				- (Q [currentState.x, currentState.y, currentState.degree, action] - tmp) / (++iteratorTimes [currentState.x, currentState.y, currentState.degree, action]);
+
+		//Q [currentState.x, currentState.y, currentState.degree, action] = reward (nextState);
 	}
 
 	public static int getRandomAction()

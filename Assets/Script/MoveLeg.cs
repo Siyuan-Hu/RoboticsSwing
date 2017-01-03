@@ -32,7 +32,7 @@ public class MoveLeg : MonoBehaviour {
 		triggerTime = -1;
 
 		// initial reward
-		//QLearning.initial ();
+		QLearning.initial ();
 
 		previousState = formalState ();
 	}
@@ -41,6 +41,42 @@ public class MoveLeg : MonoBehaviour {
 	{
 		if (mode==2 && Input.GetKey (KeyCode.W))
 			QLearning.WriteQdata ();
+
+		if (Input.GetKey (KeyCode.A)) 
+		{
+			print ("right:");
+			string r = "push right:";
+			r += QLearning.Q [1, 1, 0, 1].ToString ();
+			print (r);
+			r = "push left:";
+			r += QLearning.Q [1, 1, 0, 0].ToString ();
+			print (r);
+
+			print ("left:");
+			r = "push left:";
+			r += QLearning.Q [0, 0, 0, 0].ToString ();
+			print (r);
+			r = "push right:";
+			r += QLearning.Q [0, 0, 0, 1].ToString ();
+			print (r);
+
+			print ("middle right face left:");
+			r = "push left:";
+			r += QLearning.Q [1, 0, 0, 0].ToString ();
+			print (r);
+			r = "push right:";
+			r += QLearning.Q [1, 0, 0, 1].ToString ();
+			print (r);
+
+			print ("middle left face right:");
+			r = "push right:";
+			r += QLearning.Q [0, 1, 0, 1].ToString ();
+			print (r);
+			r = "push left:";
+			r += QLearning.Q [0, 1, 0, 0].ToString ();
+			print (r);
+
+		}
 
 		triggerTime++;
 		if (triggerTime % gapTime != 0)
@@ -64,7 +100,7 @@ public class MoveLeg : MonoBehaviour {
 		{
 			nextState = formalState ();
 
-			if (nextState.x != previousState.x) {
+			if (nextState.energy != previousState.energy) {
 				QLearning.updateQ (previousState, previousAction, nextState);
 				update = true;
 			}
@@ -92,6 +128,16 @@ public class MoveLeg : MonoBehaviour {
 			moveHorizontal = action == 0 ? -1 : 1;
 		}
 
+//		if (currentState.x > QLearning.DegreeNum / 2)
+//			moveHorizontal = 1;
+//		else
+//			moveHorizontal = -1;
+//		moveHorizontal = 0;
+//		if (currentState.y == 1 && board.transform.position.x - initialX > 0)
+//			moveHorizontal = 1;
+//		if (currentState.y == 0 && board.transform.position.x - initialX < 0)
+//			moveHorizontal = -1;		
+
 		transform.RotateAround (this.transform.position + new Vector3 (0, 1, 0), new Vector3 (0, 0, 10), 20 * moveHorizontal);// * Time.deltaTime);
 	}
 
@@ -108,13 +154,16 @@ public class MoveLeg : MonoBehaviour {
 
 		x = Mathf.RoundToInt((board.transform.position.x - initialX) / 0.1f + QLearning.Xnum / 2);
 		y = Mathf.RoundToInt((board.transform.position.y - initialY+0.3f) / 0.1f);	// y is lower than intial value add 0.3 temp
+		y = board.GetComponent<Rigidbody> ().velocity.x > 0 ? 1 : 0;
 
 		State state;
 		state.x = x;
+		state.x = board.transform.position.x - initialX > 0 ? 1 : 0;
 		state.y = y;
+		degree = 0;
 		state.degree = degree;
 
-		state.energy = 0;
+		state.energy = Mathf.Asin (Mathf.Abs (board.transform.position.x - initialX) / 12) * 100;
 		state.kineticEnergy = 0;
 
 		return state;
