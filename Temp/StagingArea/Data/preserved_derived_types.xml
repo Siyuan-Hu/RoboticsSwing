@@ -1,0 +1,11 @@
+<linker>
+<assembly fullname="Assembly-CSharp">
+<type fullname="MoveBody" preserve="all"/>
+<type fullname="MoveLeftLap" preserve="all"/>
+<type fullname="MoveLeftLeg" preserve="all"/>
+<type fullname="MoveLeg" preserve="all"/>
+<type fullname="MoveRightLap" preserve="all"/>
+<type fullname="MoveRightLeg" preserve="all"/>
+<type fullname="test" preserve="all"/>
+</assembly>
+</linker>
